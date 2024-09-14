@@ -5,5 +5,6 @@
 void delay(int milliseconds);
 void updateCursorPos();
 void leftClick();
+void toggleModes(Mode* mode);
 
 #endif // UTILS_H_

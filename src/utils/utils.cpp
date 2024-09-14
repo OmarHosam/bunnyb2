@@ -26,3 +26,14 @@ void rightClick() {
     SendMessageW(GetForegroundWindow(), WM_RBUTTONDOWN, MK_RBUTTON, MAKELPARAM(x, y));
     SendMessageW(GetForegroundWindow(), WM_RBUTTONUP, MK_RBUTTON, MAKELPARAM(x, y));
 }
+
+void toggleModes(Mode* mode) {
+    switch (*mode) {
+        case AUTOCLICK:
+            *mode = MULTIPLIE;
+            break;
+        case MULTIPLIE:
+            *mode = AUTOCLICK;
+            break;
+    }
+}

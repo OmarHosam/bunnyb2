@@ -3,8 +3,11 @@
 #include <imgui.h>
 #include <imgui_impl_dx9.h>
 #include <imgui_impl_win32.h>
+#include <sstream>  // For stringstream
+#include <iomanip>  // For std::setprecision and std::fixed
 
 #include "../utils/utils.h"
+#include "../globals.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
     HWND window,
@@ -21,6 +24,8 @@ long __stdcall WindowProcess(
 {
     if (ImGui_ImplWin32_WndProcHandler(window, message, wideParameter, longParameter))
         return true;
+
+    gui::hwnd = window;
 
     switch (message)
     {
@@ -242,10 +247,6 @@ void gui::EndRender() noexcept
         ResetDevice();
 }
 
-ImVec4 convertRGB(int r, int g, int b) {
-    return ImVec4(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-}
-
 void gui::Style() noexcept {
     ImGuiStyle* style = &ImGui::GetStyle();
 
@@ -259,123 +260,114 @@ void gui::Style() noexcept {
 
     // Gruvbox my beloved.
     ImVec4* colors = style->Colors;
-    // Gruvbox color palette
-    ImVec4 bg0 = convertRGB(29, 32, 33);      // background
-    ImVec4 bg1 = convertRGB(40, 40, 40);      // light background
-    ImVec4 bg2 = convertRGB(50, 48, 47);      // lighter background
-    ImVec4 fg = convertRGB(235, 219, 178);    // foreground
-    ImVec4 gray = convertRGB(146, 131, 116);  // gray
-    ImVec4 red = convertRGB(204, 36, 29);     // red
-    ImVec4 green = convertRGB(152, 151, 26);  // green
-    ImVec4 yellow = convertRGB(215, 153, 33); // yellow
-    ImVec4 blue = convertRGB(69, 133, 136);   // blue
-    ImVec4 purple = convertRGB(177, 98, 134); // purple
-    ImVec4 aqua = convertRGB(104, 157, 106);  // aqua
-    ImVec4 orange = convertRGB(214, 93, 14);  // orange
 
     // Text and background
-    colors[ImGuiCol_Text] = fg;
-    colors[ImGuiCol_TextDisabled] = gray;
-    colors[ImGuiCol_WindowBg] = bg0;
-    colors[ImGuiCol_ChildBg] = bg1;
-    colors[ImGuiCol_PopupBg] = bg1;
-    colors[ImGuiCol_Border] = gray;
-    colors[ImGuiCol_BorderShadow] = bg0;
-    colors[ImGuiCol_FrameBg] = bg2;
-    colors[ImGuiCol_FrameBgHovered] = bg1;
-    colors[ImGuiCol_FrameBgActive] = bg1;
-    colors[ImGuiCol_TitleBg] = bg1;
-    colors[ImGuiCol_TitleBgActive] = bg2;
-    colors[ImGuiCol_TitleBgCollapsed] = bg0;
+    colors[ImGuiCol_Text] = Color::fg;
+    colors[ImGuiCol_TextDisabled] = Color::gray;
+    colors[ImGuiCol_WindowBg] = Color::bg0;
+    colors[ImGuiCol_ChildBg] = Color::bg1;
+    colors[ImGuiCol_PopupBg] = Color::bg1;
+    colors[ImGuiCol_Border] = Color::gray;
+    colors[ImGuiCol_BorderShadow] = Color::bg0;
+    colors[ImGuiCol_FrameBg] = Color::bg2;
+    colors[ImGuiCol_FrameBgHovered] = Color::bg1;
+    colors[ImGuiCol_FrameBgActive] = Color::bg1;
+    colors[ImGuiCol_TitleBg] = Color::bg1;
+    colors[ImGuiCol_TitleBgActive] = Color::bg2;
+    colors[ImGuiCol_TitleBgCollapsed] = Color::bg0;
     
     // Buttons
-    colors[ImGuiCol_Button] = bg2;
-    colors[ImGuiCol_ButtonHovered] = blue;
-    colors[ImGuiCol_ButtonActive] = orange;
+    colors[ImGuiCol_Button] = Color::bg2;
+    colors[ImGuiCol_ButtonHovered] = Color::blue;
+    colors[ImGuiCol_ButtonActive] = Color::red;
 
     // Headers
-    colors[ImGuiCol_Header] = bg1;
-    colors[ImGuiCol_HeaderHovered] = aqua;
-    colors[ImGuiCol_HeaderActive] = blue;
+    colors[ImGuiCol_Header] = Color::bg1;
+    colors[ImGuiCol_HeaderHovered] = Color::aqua;
+    colors[ImGuiCol_HeaderActive] = Color::blue;
 
     // Checkmarks, sliders, progress bars
-    colors[ImGuiCol_CheckMark] = green;
-    colors[ImGuiCol_SliderGrab] = blue;
-    colors[ImGuiCol_SliderGrabActive] = orange;
+    colors[ImGuiCol_CheckMark] = Color::green;
+    colors[ImGuiCol_SliderGrab] = Color::blue;
+    colors[ImGuiCol_SliderGrabActive] = Color::orange;
 
     // Scrollbar
-    colors[ImGuiCol_ScrollbarBg] = bg1;
-    colors[ImGuiCol_ScrollbarGrab] = gray;
-    colors[ImGuiCol_ScrollbarGrabHovered] = blue;
-    colors[ImGuiCol_ScrollbarGrabActive] = aqua;
+    colors[ImGuiCol_ScrollbarBg] = Color::bg1;
+    colors[ImGuiCol_ScrollbarGrab] = Color::gray;
+    colors[ImGuiCol_ScrollbarGrabHovered] = Color::blue;
+    colors[ImGuiCol_ScrollbarGrabActive] = Color::aqua;
 
     // Tabs
-    colors[ImGuiCol_Tab] = bg1;
-    colors[ImGuiCol_TabHovered] = bg2;
-    colors[ImGuiCol_TabActive] = bg2;
-    colors[ImGuiCol_TabUnfocused] = bg1;
-    colors[ImGuiCol_TabUnfocusedActive] = bg2;
+    colors[ImGuiCol_Tab] = Color::bg1;
+    colors[ImGuiCol_TabHovered] = Color::bg2;
+    colors[ImGuiCol_TabActive] = Color::bg2;
+    colors[ImGuiCol_TabUnfocused] = Color::bg1;
+    colors[ImGuiCol_TabUnfocusedActive] = Color::bg2;
 
     // Resizing grip
-    colors[ImGuiCol_ResizeGrip] = gray;
-    colors[ImGuiCol_ResizeGripHovered] = aqua;
-    colors[ImGuiCol_ResizeGripActive] = orange;
+    colors[ImGuiCol_ResizeGrip] = Color::gray;
+    colors[ImGuiCol_ResizeGripHovered] = Color::aqua;
+    colors[ImGuiCol_ResizeGripActive] = Color::orange;
 
     // Plot
-    colors[ImGuiCol_PlotLines] = blue;
-    colors[ImGuiCol_PlotLinesHovered] = yellow;
-    colors[ImGuiCol_PlotHistogram] = green;
-    colors[ImGuiCol_PlotHistogramHovered] = orange;
+    colors[ImGuiCol_PlotLines] = Color::blue;
+    colors[ImGuiCol_PlotLinesHovered] = Color::yellow;
+    colors[ImGuiCol_PlotHistogram] = Color::green;
+    colors[ImGuiCol_PlotHistogramHovered] = Color::orange;
 
     // Text fields
-    colors[ImGuiCol_TextSelectedBg] = orange;
-    colors[ImGuiCol_DragDropTarget] = orange;
-    colors[ImGuiCol_NavHighlight] = green;
-    colors[ImGuiCol_NavWindowingHighlight] = fg;
-    colors[ImGuiCol_NavWindowingDimBg] = bg0;
-    colors[ImGuiCol_ModalWindowDimBg] = bg0;
+    colors[ImGuiCol_TextSelectedBg] = Color::orange;
+    colors[ImGuiCol_DragDropTarget] = Color::orange;
+    colors[ImGuiCol_NavHighlight] = Color::green;
+    colors[ImGuiCol_NavWindowingHighlight] = Color::fg;
+    colors[ImGuiCol_NavWindowingDimBg] = Color::bg0;
+    colors[ImGuiCol_ModalWindowDimBg] = Color::bg0;
 }
 
-void RenderClickTab(const char* tabName, bool* canClick, Mode* mode, int* cps, int* multiplier, int* delay) {
-    if (ImGui::BeginTabItem(tabName)) {
+// Generalized function to render the click tab for either left or right
+void RenderClickTab(const char* label, bool& canClick, Settings::ClickSettings& settings) {
+    if (ImGui::BeginTabItem(label)) {
         ImGui::Columns(2);
-        ImGui::Checkbox(std::string("Toggle ").append(tabName).append("click").c_str(), canClick);
+        ImGui::Checkbox(std::string("Toggle ").append(label).append("click").c_str(), &canClick);
 
-        ImGui::NextColumn();
+        if (settings.mode == AUTOCLICK) {
+            ImGui::Checkbox("Jitter", &settings.autoclick.jitter);
+            ImGui::NextColumn();
+            
+            ImGui::SliderInt("CPS", &settings.autoclick.cps, 1, 30);
+        } else if (settings.mode == MULTIPLIE) {
+            ImGui::NextColumn();
 
-        if (*mode == AUTOCLICK) {
-            ImGui::SliderInt("CPS", cps, 1, 30);
-        }
-
-        if (*mode == MULTIPLIE) {
-            ImGui::SliderInt("Multiplier", multiplier, 1, 10);
-            ImGui::SliderInt("Delay", delay, 0, 2000);
+            ImGui::SliderInt("Multiplier", &settings.multiplie.multiplier, 1, 10);
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(2) << (float)settings.multiplie.delay / 1000.f;  // Set precision to 2 decimal places.
+            
+            ImGui::SliderInt("Delay", &settings.multiplie.delay, 0, 2000, ss.str().c_str());
         }
 
         ImGui::Columns(1); // Closing the column.
 
-        if (ImGui::Button((*mode == AUTOCLICK ? "Toggle Multiplier" : "Toggle Autoclicker"))) {
-            toggleModes(mode);
+        if (settings.mode == AUTOCLICK && settings.autoclick.jitter) {
+            ImGui::SliderInt("Jitter Intensity", &settings.autoclick.jitterIntensity, 1, 20);
+        }
+
+        if (ImGui::Button((settings.mode == AUTOCLICK ? "Toggle Multiplier" : "Toggle Autoclicker"))) {
+            toggleModes(&settings.mode);
         }
 
         ImGui::EndTabItem();
     }
 }
 
+// Main interface rendering function
 void RenderInterface() {
-    RenderClickTab("Left", &(Settings::canLeftClick), &(Settings::Modes::mode_left), 
-                   &(Settings::Left::Autoclick::cps), &(Settings::Left::Multiplie::multiplier), 
-                   &(Settings::Left::Multiplie::delay));
-
-    RenderClickTab("Right", &(Settings::canRightClick), &(Settings::Modes::mode_right), 
-                   &(Settings::Right::Autoclick::cps), &(Settings::Right::Multiplie::multiplier), 
-                   &(Settings::Right::Multiplie::delay));
+    RenderClickTab("Left", Settings::canLeftClick, Settings::leftClickSettings);
+    RenderClickTab("Right", Settings::canRightClick, Settings::rightClickSettings);
 }
 
 bool HotkeyWidget(const char* label, int& key) {
     ImGui::TextUnformatted(label); // Label for the hotkey widget
     ImGui::SameLine();
-    int temp;
 
     // Determine the text to display based on the key value
     char keyDisplay[64];
@@ -434,14 +426,48 @@ void gui::Render() noexcept
 
     if (ImGui::BeginTabBar("tabs")) {
         if (ImGui::BeginTabItem("General")) {
-            ImGui::Checkbox("Enable", &(Settings::toggled));
+            ImGui::Checkbox("Enable", &Settings::toggled);
+            ImGui::Checkbox("Disable on focus", &Settings::disableOnFocus);
+
             HotkeyWidget("Toggle Hotkey", Settings::toggleKey);
+
             ImGui::EndTabItem();
         }
 
         RenderInterface();
+
+        const char* credit = "Made by @cixq.";
+        const char* version = "BunnyB2 BUILD 0.4.1";
+
+        ImVec2 creditSize = ImGui::CalcTextSize(credit);
+        ImVec2 versionSize = ImGui::CalcTextSize(version);
+
+        ImVec2 creditPos(WIDTH - creditSize.x - 8.0f, HEIGHT - creditSize.y - 8.0f);
+        ImVec2 versionPos(8.0f, HEIGHT - versionSize.y - 8.0f);
+
+        ImGui::PushStyleColor(ImGuiCol_Text, Color::bg2);
         
+        ImGui::SetCursorPos(creditPos);
+        ImGui::Text("%s", credit);
+
+        ImGui::SetCursorPos(versionPos);
+        ImGui::Text("%s", version);
+        
+        ImGui::PopStyleColor();
         ImGui::EndTabBar();
+    }
+
+    // Check if the window is focused, and only disable toggling
+    // if the checkbox was not interacted with this frame
+    if (Settings::disableOnFocus) {
+        if (GetForegroundWindow() == gui::hwnd) {
+            if (Settings::toggled && gui::isWindowNotFocused) {
+                gui::isWindowNotFocused = false;
+                Settings::toggled = false;   
+            }
+        } else {
+            gui::isWindowNotFocused = true;
+        }
     }
 
     ImGui::End();

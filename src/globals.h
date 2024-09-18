@@ -1,40 +1,36 @@
-enum Mode
-{
+#pragma once
+
+#include <windows.h>
+
+enum Mode {
     AUTOCLICK,
     MULTIPLIE,
 };
 
 namespace Settings {
-    namespace Left {
-        namespace Autoclick {
+    inline struct ClickSettings {
+        struct AutoclickSettings {
             int cps = 15;
-        };
-        namespace Multiplie {
+            bool jitter = false;
+            int jitterIntensity = 3;
+        } autoclick;
+
+        struct MultiplieSettings {
             int multiplier = 1;
             int delay = 30;
-        };
-    }
+        } multiplie;
 
-    namespace Right {
-        namespace Autoclick {
-            int cps = 15;
-        };
-        namespace Multiplie {
-            int multiplier = 1;
-            int delay = 30;
-        };
-    }
-    
-    int toggleKey = 0x50;
-    bool canRightClick = true;
-    bool canLeftClick = false;
-    namespace Modes {
-        enum Mode mode_left = MULTIPLIE;
-        enum Mode mode_right = AUTOCLICK;
-    };
-    bool toggled = true;
-};
+        Mode mode = AUTOCLICK;
+    } leftClickSettings, rightClickSettings;
 
-int x;
-int y;
-POINT CursorPos;
+    inline int toggleKey = 0x50;
+    inline bool canRightClick = false;
+    inline bool canLeftClick = false;
+
+    inline bool disableOnFocus = false;
+
+    inline bool toggled = false; // General toggle flag.
+}
+
+inline int x, y;
+inline POINT CursorPos;

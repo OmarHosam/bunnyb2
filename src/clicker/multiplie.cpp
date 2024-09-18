@@ -1,33 +1,59 @@
+// I guess there's no better way for refactoring this code other than this.
 #include "multiplie.h"
+#include <windows.h>
+#include "../utils/utils.h"
+#include "../globals.h"
 
 bool canLeftClick = false;
 bool canRightClick = false;
 
-void handleMultiplie(int button, bool& canClick, bool clickEnabled, void (*clickFunc)(), int multiplie, int time) {
-    if (clickEnabled) {
-        // Check if button is pressed and can click
-        if (GetAsyncKeyState(button) < 0 && !canClick) {
-            canClick = true;
+struct ClickSettings {
+    bool& internalCanClick;
+    bool clickEnabled;
+    void (*clickFunc)();
+    int multiplier;
+    int delay;
+};
+
+void handleMultiplie(int button, ClickSettings settings) {
+    if (settings.clickEnabled) {
+        // Check if the button is pressed and canClick is false (start clicking)
+        if (GetAsyncKeyState(button) < 0 && !settings.internalCanClick) {
+            settings.internalCanClick = true;
         }
 
-        // Check if button is released and canClick is true
-        if (GetAsyncKeyState(button) >= 0 && canClick) {
+        // Check if the button is released and internalCanClick is true (perform the clicks)
+        if (GetAsyncKeyState(button) >= 0 && settings.internalCanClick) {
             updateCursorPos();
 
-            for (int i = 1; i <= multiplie; i++) {
-                delay(time);
-                clickFunc();
+            for (int i = 1; i <= settings.multiplier; i++) {
+                delay(settings.delay);  // Delay between each click
+                settings.clickFunc();   // Perform the click
             }
 
-            canClick = false;
+            settings.internalCanClick = false;  // Reset internal click state
         }
     }
 }
 
 void multiplie_left() {
-    handleMultiplie(VK_LBUTTON, canLeftClick, Settings::canLeftClick, leftClick, Settings::Left::Multiplie::multiplier, Settings::Left::Multiplie::delay);
+    ClickSettings leftSettings = {
+        canLeftClick,
+        Settings::canLeftClick, 
+        leftClick,
+        Settings::leftClickSettings.multiplie.multiplier, 
+        Settings::leftClickSettings.multiplie.delay
+    };
+    handleMultiplie(VK_LBUTTON, leftSettings);
 }
 
 void multiplie_right() {
-    handleMultiplie(VK_RBUTTON, canRightClick, Settings::canRightClick, rightClick, Settings::Right::Multiplie::multiplier, Settings::Right::Multiplie::delay);
+    ClickSettings rightSettings = {
+        canRightClick,
+        Settings::canRightClick, 
+        rightClick,
+        Settings::rightClickSettings.multiplie.multiplier, 
+        Settings::rightClickSettings.multiplie.delay
+    };
+    handleMultiplie(VK_RBUTTON, rightSettings);
 }

@@ -1,65 +1,76 @@
 #include "pch.h"
+
 #include "utils/utils.h"
 #include "clicker/autoclick.h"
 #include "clicker/multiplie.h"
 #include "gui/gui.h"
 
-// TODO: Get imgui working properly
-// so far it doesn't even get imported lol.
+// Function to toggle settings based on hotkey press
+void handleToggle() {
+    if (GetAsyncKeyState(Settings::toggleKey)) {
+        Settings::toggled = !Settings::toggled;
+        delay(300);  // Small delay to prevent rapid toggling
+    }
+}
 
+// Main logic thread to manage modes and toggle
 void handleModes() {
     while (gui::isRunning) {
-        if (GetAsyncKeyState(Settings::toggleKey)) {
-            Settings::toggled = !Settings::toggled;
-            delay(300);
-        }
-        
-        if (!Settings::toggled) continue;
+        handleToggle();
 
-        // Left.
-        switch (Settings::Modes::mode_left) {
-        case AUTOCLICK:
-            autoclick_left();
-            break;
-        case MULTIPLIE:
-            multiplie_left();
-            break;
+        if (!Settings::toggled) continue;  // Skip processing if not toggled
+
+        // Left
+        switch (Settings::leftClickSettings.mode) {
+            case AUTOCLICK:
+                autoclick_left();
+                break;
+            case MULTIPLIE:
+                multiplie_left();
+                break;
         }
 
-        // Right.
-        switch (Settings::Modes::mode_right) {
-        case AUTOCLICK:
-            autoclick_right();
-            break;
-        case MULTIPLIE:
-            multiplie_right();
-            break;
+        // Right
+        switch (Settings::rightClickSettings.mode) {
+            case AUTOCLICK:
+                autoclick_right();
+                break;
+            case MULTIPLIE:
+                multiplie_right();
+                break;
         }
     }
 }
 
 int main() {
-    // create gui
+    // Initialize GUI
     gui::CreateHWindow("BunnyB2");
     gui::CreateDevice();
     gui::CreateImGui();
 
+    // Start the logic handling thread
     std::thread logic(handleModes);
 
+    // Main render loop
     while (gui::isRunning) {
-        gui::BeginRender();
-        gui::Render();
-        gui::EndRender();
+        gui::BeginRender();  // Start GUI rendering
+        gui::Render();       // Render GUI elements
+        gui::EndRender();    // End GUI rendering
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));  // Limit CPU usage
     }
 
-    Settings::toggled = false;
+    Settings::toggled = false;  // Ensure settings are disabled on exit
 
-    // destroy gui
+    // Cleanup GUI
     gui::DestroyImGui();
     gui::DestroyDevice();
     gui::DestroyHWindow();
+
+    // Join logic thread before exit
+    if (logic.joinable()) {
+        logic.join();
+    }
 
     return 0;
 }

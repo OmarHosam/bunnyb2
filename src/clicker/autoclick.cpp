@@ -12,7 +12,7 @@ void handleAutoclick(int button, bool canClick, void (*clickFunc)(), Settings::C
             int jitterIntensity = settings.autoclick.jitterIntensity;
             SetCursorPos(x + range((jitterIntensity * -1), jitterIntensity), y + range((jitterIntensity * -1), jitterIntensity));
         }
-        delay(1000 / settings.autoclick.cps);  // Delay based on CPS
+        delay(1000 / range(settings.autoclick.cps_min, settings.autoclick.cps_max));  // Delay based on CPS.
     }
 }
 

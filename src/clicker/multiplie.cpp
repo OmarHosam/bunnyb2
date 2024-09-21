@@ -13,6 +13,7 @@ struct ClickSettings {
     void (*clickFunc)();
     int multiplier;
     int delay;
+    int chance;
 };
 
 void handleMultiplie(int button, ClickSettings settings) {
@@ -23,7 +24,8 @@ void handleMultiplie(int button, ClickSettings settings) {
         }
 
         // Check if the button is released and internalCanClick is true (perform the clicks)
-        if (GetAsyncKeyState(button) >= 0 && settings.internalCanClick) {
+        if (GetAsyncKeyState(button) >= 0 && settings.internalCanClick
+        && (range(1, 100) < settings.chance)) {
             updateCursorPos();
 
             for (int i = 1; i <= settings.multiplier; i++) {
@@ -42,7 +44,8 @@ void multiplie_left() {
         Settings::canLeftClick, 
         leftClick,
         Settings::leftClickSettings.multiplie.multiplier, 
-        Settings::leftClickSettings.multiplie.delay
+        Settings::leftClickSettings.multiplie.delay,
+        Settings::leftClickSettings.multiplie.chance
     };
     handleMultiplie(VK_LBUTTON, leftSettings);
 }
@@ -53,7 +56,8 @@ void multiplie_right() {
         Settings::canRightClick, 
         rightClick,
         Settings::rightClickSettings.multiplie.multiplier, 
-        Settings::rightClickSettings.multiplie.delay
+        Settings::rightClickSettings.multiplie.delay,
+        Settings::rightClickSettings.multiplie.chance
     };
     handleMultiplie(VK_RBUTTON, rightSettings);
 }

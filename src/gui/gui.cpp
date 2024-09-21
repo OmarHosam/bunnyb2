@@ -6,6 +6,8 @@
 #include <sstream>  // For stringstream
 #include <iomanip>  // For std::setprecision and std::fixed
 
+#include <cmath> // Include for fabs
+
 #include "../utils/utils.h"
 #include "../globals.h"
 
@@ -323,6 +325,26 @@ void gui::Style() noexcept {
     colors[ImGuiCol_NavWindowingDimBg] = Color::bg0;
     colors[ImGuiCol_ModalWindowDimBg] = Color::bg0;
 }
+// Clamp function
+inline float ImClamp(int value, int min, int max) {
+    return value < min ? min : (value > max ? max : value);
+}
+
+void TwoHandleSlider(int* minValue, int* maxValue, int minLimit, int maxLimit) {
+    // Clamp the values
+    *minValue = ImClamp(*minValue, minLimit, *maxValue);
+    *maxValue = ImClamp(*maxValue, *minValue, maxLimit);
+    
+    // Create a single slider and manage the min/max values
+    ImGui::SliderInt("Min CPS", minValue, minLimit, maxLimit);
+    
+    // Clamp the values
+    *maxValue = ImClamp(*maxValue, *minValue, maxLimit);
+    *minValue = ImClamp(*minValue, minLimit, *maxValue);
+    
+    // Render a separate visual representation for max
+    ImGui::SliderInt("Max CPS", maxValue, minLimit, maxLimit);
+}
 
 // Generalized function to render the click tab for either left or right
 void RenderClickTab(const char* label, bool& canClick, Settings::ClickSettings& settings) {
@@ -333,8 +355,8 @@ void RenderClickTab(const char* label, bool& canClick, Settings::ClickSettings& 
         if (settings.mode == AUTOCLICK) {
             ImGui::Checkbox("Jitter", &settings.autoclick.jitter);
             ImGui::NextColumn();
-            
-            ImGui::SliderInt("CPS", &settings.autoclick.cps, 1, 30);
+
+            TwoHandleSlider(&settings.autoclick.cps_min, &settings.autoclick.cps_max, 1, 20);
         } else if (settings.mode == MULTIPLIE) {
             ImGui::NextColumn();
 
@@ -343,6 +365,7 @@ void RenderClickTab(const char* label, bool& canClick, Settings::ClickSettings& 
             ss << std::fixed << std::setprecision(2) << (float)settings.multiplie.delay / 1000.f;  // Set precision to 2 decimal places.
             
             ImGui::SliderInt("Delay", &settings.multiplie.delay, 0, 2000, ss.str().c_str());
+            ImGui::SliderInt("Chance (%)", &settings.multiplie.chance, 1, 100);
         }
 
         ImGui::Columns(1); // Closing the column.
@@ -359,7 +382,7 @@ void RenderClickTab(const char* label, bool& canClick, Settings::ClickSettings& 
     }
 }
 
-// Main interface rendering function
+// Main interface rendering function.
 void RenderInterface() {
     RenderClickTab("Left", Settings::canLeftClick, Settings::leftClickSettings);
     RenderClickTab("Right", Settings::canRightClick, Settings::rightClickSettings);
@@ -437,7 +460,7 @@ void gui::Render() noexcept
         RenderInterface();
 
         const char* credit = "Made by @cixq.";
-        const char* version = "BunnyB2 BUILD 0.4.1";
+        const char* version = "BunnyB2 BUILD 0.5.0";
 
         ImVec2 creditSize = ImGui::CalcTextSize(credit);
         ImVec2 versionSize = ImGui::CalcTextSize(version);

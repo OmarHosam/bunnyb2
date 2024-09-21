@@ -11,6 +11,8 @@ namespace Settings {
     inline struct ClickSettings {
         struct AutoclickSettings {
             int cps = 15;
+            int cps_min = 10;
+            int cps_max = 15;
             bool jitter = false;
             int jitterIntensity = 3;
         } autoclick;
@@ -18,6 +20,7 @@ namespace Settings {
         struct MultiplieSettings {
             int multiplier = 1;
             int delay = 30;
+            int chance = 100;
         } multiplie;
 
         Mode mode = AUTOCLICK;
